@@ -40,9 +40,13 @@
 
           - lsb-release
 
-      state: present
+          - git-credential-manager
 
-      
+          - yakuake
+
+          - postman
+
+        state: present  
 
     - name: Add Microsoft repository key
 
