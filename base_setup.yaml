@@ -1,18 +1,16 @@
 ---
-
-- name: Base setup for KDE Neon laptop
+- name: Base setup for ubuntu system
   hosts: localhost
   become: yes
-  gather_facts: yes
+  gather_facts: true
+  vars_files:
+    - ./vars.yml
 
   tasks:
-
     - name: Update repositories cache
       apt:
         update_cache: yes
-
-    #  - postman - git-credential-manager
-
+        upgrade: "{{ upgrade }}"
 
     - name: "Add nodejs apt key"
       apt_key:
@@ -25,7 +23,7 @@
 
     - name: "Add chrome apt key"
       apt_key:
-        url:  https://dl.google.com/linux/linux_signing_key.pub
+        url: https://dl.google.com/linux/linux_signing_key.pub
         state: present
 
     - name: Add Google Chrome repository
@@ -80,8 +78,6 @@
           - containerd.io
         state: present
 
-
-
     - name: Install VSCode
       ansible.builtin.apt:
         deb: https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64
@@ -93,12 +89,10 @@
         state: present
         update_cache: yes
 
-
     - name: Install Zoom
       apt:
         deb: https://zoom.us/client/latest/zoom_amd64.deb
         state: present
-
 
     - name: Add current user to docker group
       user:
@@ -106,13 +100,18 @@
         groups: docker
         append: yes
 
+    - name: Install snaps
+      community.general.snap:
+        name:
+          - postman
 
-
-    #
-    # - name: Install Google Chrome
-    #   apt:
-    #     deb: https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-    #     state: present
-
-
-
+    - git_config:
+        name: user.email
+        scope: global
+        value: "{{ email }}"
+      become: no
+    - community.general.git_config:
+        name: "user.name"
+        scope: global
+        value: "{{ username }}"
+      become: no
