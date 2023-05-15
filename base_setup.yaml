@@ -1,210 +1,118 @@
 ---
 
 - name: Base setup for KDE Neon laptop
-
   hosts: localhost
-
   become: yes
-
   gather_facts: yes
 
   tasks:
 
     - name: Update repositories cache
-
       apt:
-
         update_cache: yes
 
+    #  - postman - git-credential-manager
 
 
-    - name: Install required packages
-
-      apt:
-
-        name:
-
-          - git
-
-          - bash-completion
-
-          - curl
-
-          - apt-transport-https
-
-          - ca-certificates
-
-          - gnupg
-
-          - software-properties-common
-
-          - lsb-release
-
-          - git-credential-manager
-
-          - yakuake
-
-          - postman
-
-        state: present  
-
-    - name: Add Microsoft repository key
-
-      ansible.builtin.apt_key:
-
-        url: https://packages.microsoft.com/keys/microsoft.asc
-
+    - name: "Add nodejs apt key"
+      apt_key:
+        url: https://deb.nodesource.com/gpgkey/nodesource.gpg.key
         state: present
 
+    - name: "Add nodejs ppa for apt repo"
+      apt_repository:
+        repo: deb https://deb.nodesource.com/node_18.x jammy main
 
+    - name: "Add chrome apt key"
+      apt_key:
+        url:  https://dl.google.com/linux/linux_signing_key.pub
+        state: present
 
-    - name: Add Microsoft repository
-
+    - name: Add Google Chrome repository
       ansible.builtin.apt_repository:
+        repo: "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main"
+        state: present
 
-        repo: "deb [arch=amd64] https://packages.microsoft.com/repos/edge/ $(lsb_release -cs) main"
+    - name: Add Vivaldi key
+      apt_key:
+        url: https://repo.vivaldi.com/archive/linux_signing_key.pub
+        state: present
 
+    - name: Add Vivaldi repository
+      ansible.builtin.apt_repository:
+        repo: "deb [arch=amd64] http://repo.vivaldi.com/archive/deb/ stable main"
+        state: present
+
+    - name: Add Docker key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        keyring: /etc/apt/keyrings/docker.gpg
+        state: present
+
+    - name: Add Docker repository
+      ansible.builtin.apt_repository:
+        repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu jammy stable"
+        state: present
+
+    - name: Update repositories cache
+      apt:
+        update_cache: yes
+
+    - name: Install required packages
+      apt:
+        name:
+          - git
+          - bash-completion
+          - curl
+          - python3-apt
+          - apt-transport-https
+          - ca-certificates
+          - gnupg
+          - software-properties-common
+          - lsb-release
+          - yakuake
+          - wget
+          - vivaldi-stable
+          - google-chrome-stable
+          - nodejs
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
         state: present
 
 
 
     - name: Install VSCode
-
-      apt:
-
-        name: code
-
+      ansible.builtin.apt:
+        deb: https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64
         state: present
-
-        update_cache: yes
-
-
 
     - name: Install .NET SDK
-
       apt:
-
         name: dotnet-sdk-6.0
-
         state: present
-
         update_cache: yes
-
 
 
     - name: Install Zoom
-
       apt:
-
         deb: https://zoom.us/client/latest/zoom_amd64.deb
-
         state: present
-
-
-
-    - name: Add Google Chrome repository
-
-      ansible.builtin.apt_repository:
-
-        repo: "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main"
-
-        state: present
-
-
-
-    - name: Install Google Chrome
-
-      apt:
-
-        name: google-chrome-stable
-
-        state: present
-
-        update_cache: yes
-
-
-
-    - name: Add Vivaldi repository
-
-      ansible.builtin.apt_repository:
-
-        repo: "deb [arch=amd64] http://repo.vivaldi.com/archive/deb/ stable main"
-
-        state: present
-
-
-
-    - name: Install Vivaldi
-
-      apt:
-
-        name: vivaldi-stable
-
-        state: present
-
-        update_cache: yes
-
-
-
-    - name: Install Node.js
-
-      ansible.builtin.apt_repository:
-
-        repo: "deb https://deb.nodesource.com/node_16.x $(lsb_release -cs) main"
-
-        state: present
-
-      register: nodejs_repo
-
-
-
-    - name: Install Node.js
-
-      apt:
-
-        name: nodejs
-
-        state: present
-
-        update_cache: "{{ nodejs_repo.changed }}"
-
-
-
-    - name: Add Docker repository
-
-      ansible.builtin.apt_repository:
-
-        repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-
-        state: present
-
-
-
-    - name: Install Docker
-
-      apt:
-
-        name:
-
-          - docker-ce
-
-          - docker-ce-cli
-
-          - containerd.io
-
-        state: present
-
-        update_cache: yes
-
 
 
     - name: Add current user to docker group
-
       user:
-
-        name: "{{ ansible_user }}"
-
+        name: "{{ ansible_user_id }}"
         groups: docker
-
         append: yes
+
+
+
+    #
+    # - name: Install Google Chrome
+    #   apt:
+    #     deb: https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+    #     state: present
+
+
 
