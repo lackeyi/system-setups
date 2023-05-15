@@ -1,0 +1,14 @@
+---
+- name: Base setup for ubuntu wustl machine
+  hosts: localhost
+  become: yes
+  gather_facts: yes
+  vars_files:
+    - ./vars.yml
+
+  tasks:
+    - name: Install required packages
+      apt:
+        name:
+          - network-manager-openconnect-gnome
+        state: present
