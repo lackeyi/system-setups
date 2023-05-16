@@ -11,4 +11,64 @@
       apt:
         name:
           - network-manager-openconnect-gnome
+          # onedrive deps
+          - libcurl4-openssl-dev
+          - libsqlite3-dev
         state: present
+
+    - name: Install dmd for onedrive client
+      community.general.snap:
+        name:
+          - dmd
+        classic: true
+      become: no
+
+    - name: Create onedrive folder
+      file:
+        path: ~/code/github/onedrive
+        state: directory
+      become: no
+
+    - name: Clone onedrive repository
+      git:
+        repo: https://github.com/skilion/onedrive.git
+        dest: ~/code/github/onedrive
+      become: no
+      register: repo_clone
+
+    - name: Compile onedrive
+      command: make
+      args:
+        chdir: ~/code/github/onedrive
+      become: no
+      when: repo_clone.changed
+
+    - name: Install onedrive
+      become: no
+      when: repo_clone.changed
+      command: sudo make install
+      args:
+        chdir: ~/code/github/onedrive
+
+    # - name: Enable onedrive service
+    #   systemd:
+    #     name: onedrive.service
+    #     enabled: yes
+    #     scope: "user"
+
+    # - name: Start onedrive service
+    #   systemd:
+    #     name: onedrive
+    #     state: started
+    - name: Copy readme file
+      fetch:
+        src: wustl_notes.md
+        dest: /tmp/
+    - name: Read wustl readme file
+      slurp:
+        src: /tmp/localhost/wustl_notes.md
+      register: readme_content
+
+    - name: Print readme file contents
+      debug:
+        msg: "{{ readme_content.content | b64decode }}"
