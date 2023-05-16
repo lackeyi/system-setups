@@ -50,16 +50,6 @@
       args:
         chdir: ~/code/github/onedrive
 
-    # - name: Enable onedrive service
-    #   systemd:
-    #     name: onedrive.service
-    #     enabled: yes
-    #     scope: "user"
-
-    # - name: Start onedrive service
-    #   systemd:
-    #     name: onedrive
-    #     state: started
     - name: Copy readme file
       fetch:
         src: wustl_notes.md
